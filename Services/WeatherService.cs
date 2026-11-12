@@ -6,8 +6,11 @@ using CropAdvisory.Data;
 
 namespace CropAdvisory.Services;
 
+public record GeoResult(double Latitude, double Longitude, string Name);
+
 public interface IWeatherService
 {
+    Task<GeoResult?> GeocodeAsync(string location);
     Task<WeatherInfoDto> GetCurrentWeatherAsync(string location);
     Task<List<DailyForecastDto>> GetForecastAsync(string location);
 }
@@ -25,23 +28,39 @@ public class WeatherService : IWeatherService
         _logger = logger;
     }
 
+    // Geocoding works from Render (Open-Meteo only rate-limits the forecast host there),
+    // so this stays on the server. Tries India first, then worldwide.
+    public async Task<GeoResult?> GeocodeAsync(string location)
+    {
+        if (string.IsNullOrWhiteSpace(location)) return null;
+        location = location.Trim();
+
+        foreach (var country in new[] { "&countryCode=IN", "" })
+        {
+            try
+            {
+                var geoUrl = $"{_config["OpenMeteo:GeocodingUrl"]}?name={Uri.EscapeDataString(location)}&count=1&language=en&format=json{country}";
+                var resp = await _http.GetStringAsync(geoUrl);
+                using var doc = JsonDocument.Parse(resp);
+                if (!doc.RootElement.TryGetProperty("results", out var results) || results.GetArrayLength() == 0)
+                    continue;
+                var first = results[0];
+                var name = first.TryGetProperty("name", out var n) ? n.GetString() ?? location : location;
+                return new GeoResult(first.GetProperty("latitude").GetDouble(),
+                                     first.GetProperty("longitude").GetDouble(), name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Geocoding failed for {Location}", location);
+            }
+        }
+        return null;
+    }
+
     private async Task<(double lat, double lon)?> GeolocateAsync(string location)
     {
-        try
-        {
-            var geoUrl = $"{_config["OpenMeteo:GeocodingUrl"]}?name={Uri.EscapeDataString(location)}&count=1&language=en&format=json";
-            var resp = await _http.GetStringAsync(geoUrl);
-            using var doc = JsonDocument.Parse(resp);
-            var results = doc.RootElement.GetProperty("results");
-            if (results.GetArrayLength() == 0) return null;
-            var first = results[0];
-            return (first.GetProperty("latitude").GetDouble(), first.GetProperty("longitude").GetDouble());
-        }
-        catch (Exception)
-        {
-            _logger.LogWarning("Geocoding request failed.");
-            return null;
-        }
+        var g = await GeocodeAsync(location);
+        return g == null ? null : (g.Latitude, g.Longitude);
     }
 
     public async Task<WeatherInfoDto> GetCurrentWeatherAsync(string location)
@@ -66,9 +85,9 @@ public class WeatherService : IWeatherService
                 Condition = WeatherCodeToCondition(current.GetProperty("weathercode").GetInt32())
             };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _logger.LogWarning("Current weather request failed.");
+            _logger.LogError(ex, "Current weather request failed for {Location}", location);
             return new WeatherInfoDto { TemperatureC = 28, Condition = "Sunny", Humidity = 50, WindSpeed = 10, RainProbability = 10 };
         }
     }
@@ -101,9 +120,9 @@ public class WeatherService : IWeatherService
                 RainProbability = rainProbs[i]
             }).ToList();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _logger.LogWarning("Weather forecast request failed.");
+            _logger.LogError(ex, "Weather forecast request failed for {Location}", location);
             return new List<DailyForecastDto>();
         }
     }

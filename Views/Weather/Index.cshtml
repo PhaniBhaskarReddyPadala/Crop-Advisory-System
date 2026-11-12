@@ -1,10 +1,8 @@
 @model CropAdvisory.ViewModels.WeatherPageViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Weather Forecast";
     Layout = "_FarmerLayout";
-    var weatherBg = Model.Current.Condition.Contains("Rain") ? "linear-gradient(135deg,#1565C0,#1E88E5)"
-                  : Model.Current.Condition.Contains("Cloud") ? "linear-gradient(135deg,#546E7A,#78909C)"
-                  : "linear-gradient(135deg,#F57F17,#F9A825)";
 }
 
 <div class="pt-3">
@@ -18,115 +16,219 @@
         </div>
     </form>
 
-    <!-- Alert -->
-    @{
-        var alertClass = Model.AlertLevel == "red" ? "alert-danger" : Model.AlertLevel == "yellow" ? "alert-warning" : "alert-success";
-    }
-    @foreach (var adv in Model.Advisories)
+    @if (!Model.LocationFound)
     {
-        <div class="alert @alertClass border-0 small mb-3" style="border-radius:12px;">
-            @adv
-        </div>
-    }
-
-    <!-- Current Weather -->
-    <div class="card border-0 text-white mb-4" style="border-radius:20px;background:@weatherBg;">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="display-4 fw-bold">@Model.Current.TemperatureC.ToString("0")°C</div>
-                    <div class="fs-5">@Model.Current.Condition</div>
-                    <div class="small opacity-75 mt-1">📍 @Model.Location</div>
-                </div>
-                <div class="fs-1">
-                    @(Model.Current.Condition.Contains("Rain") ? "🌧️"
-                    : Model.Current.Condition.Contains("Cloud") ? "☁️"
-                    : Model.Current.Condition.Contains("Thunder") ? "⛈️"
-                    : "☀️")
-                </div>
-            </div>
-            <hr class="border-white opacity-25 my-3" />
-            <div class="row g-2">
-                <div class="col-4 text-center">
-                    <div class="small opacity-75">💧 Humidity</div>
-                    <div class="fw-bold">@Model.Current.Humidity%</div>
-                </div>
-                <div class="col-4 text-center">
-                    <div class="small opacity-75">💨 Wind</div>
-                    <div class="fw-bold">@Model.Current.WindSpeed km/h</div>
-                </div>
-                <div class="col-4 text-center">
-                    <div class="small opacity-75">🌧 Rain</div>
-                    <div class="fw-bold">@Model.Current.RainProbability%</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 7-Day Forecast -->
-    <h5 class="fw-bold mb-3" style="color:var(--primary);">7-Day Forecast</h5>
-    @if (Model.Forecast.Any())
-    {
-        <div class="d-flex gap-3 overflow-auto pb-2 mb-4">
-            @foreach (var day in Model.Forecast)
-            {
-                var date = DateTime.TryParse(day.Date, out var d) ? d : DateTime.Now;
-                <div class="card border-0 shadow-sm flex-shrink-0 text-center p-3" style="border-radius:16px;min-width:100px;">
-                    <div class="small fw-bold text-muted">@date.ToString("ddd")</div>
-                    <div class="small text-muted">@date.ToString("MMM d")</div>
-                    <div class="fs-3 my-2">
-                        @(day.Condition.Contains("Rain") ? "🌧️"
-                        : day.Condition.Contains("Cloud") ? "☁️"
-                        : day.Condition.Contains("Thunder") ? "⛈️"
-                        : day.Condition.Contains("Drizzle") ? "🌦️"
-                        : "☀️")
-                    </div>
-                    <div class="fw-bold small" style="color:var(--primary);">@day.MaxTempC.ToString("0")°</div>
-                    <div class="small text-muted">@day.MinTempC.ToString("0")°</div>
-                    <div class="small mt-1">
-                        <span class="badge" style="background:#E3F2FD;color:#1565C0;font-size:0.65rem;">
-                            💧@day.RainProbability.ToString("0")%
-                        </span>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Rainfall Chart -->
-        <h5 class="fw-bold mb-3" style="color:var(--primary);">📊 Rainfall Probability</h5>
-        <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius:16px;">
-            <canvas id="rainChart" height="120"></canvas>
+        <div class="alert alert-warning">
+            Couldn't find “@Model.Location”. Try a nearby town or district name.
         </div>
     }
     else
     {
-        <div class="alert alert-info">Weather forecast unavailable. Please check your internet connection.</div>
+        <!-- The browser fills everything below using these coordinates -->
+        <div id="weatherApp"
+             data-lat="@Model.Latitude.ToString(CultureInfo.InvariantCulture)"
+             data-lon="@Model.Longitude.ToString(CultureInfo.InvariantCulture)"
+             data-location="@Model.Location">
+
+            <!-- Advisories -->
+            <div id="advisories"></div>
+
+            <!-- Current Weather -->
+            <div id="currentCard" class="card border-0 text-white mb-4"
+                 style="border-radius:20px;background:linear-gradient(135deg,#F57F17,#F9A825);">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="display-4 fw-bold" id="curTemp">--°C</div>
+                            <div class="fs-5" id="curCond">Loading weather…</div>
+                            <div class="small opacity-75 mt-1">📍 @Model.Location</div>
+                        </div>
+                        <div class="fs-1" id="curIcon">⏳</div>
+                    </div>
+                    <hr class="border-white opacity-25 my-3" />
+                    <div class="row g-2">
+                        <div class="col-4 text-center">
+                            <div class="small opacity-75">💧 Humidity</div>
+                            <div class="fw-bold" id="curHumidity">--</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="small opacity-75">💨 Wind</div>
+                            <div class="fw-bold" id="curWind">--</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="small opacity-75">🌧 Rain</div>
+                            <div class="fw-bold" id="curRain">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7-Day Forecast -->
+            <h5 class="fw-bold mb-3" style="color:var(--primary);">7-Day Forecast</h5>
+            <div id="forecastRow" class="d-flex gap-3 overflow-auto pb-2 mb-4"></div>
+
+            <div id="forecastError" class="alert alert-info d-none">
+                Weather forecast is temporarily unavailable.
+                <button type="button" id="retryBtn" class="btn btn-sm btn-outline-primary ms-2">Try again</button>
+            </div>
+
+            <!-- Rainfall Chart -->
+            <div id="chartSection" class="d-none">
+                <h5 class="fw-bold mb-3" style="color:var(--primary);">📊 Rainfall Probability</h5>
+                <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius:16px;">
+                    <canvas id="rainChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
 @section Scripts {
 <script>
-@if (Model.Forecast.Any())
-{
-    var labels = string.Join(",", Model.Forecast.Select(f =>
-        $"'{(DateTime.TryParse(f.Date, out var d) ? d.ToString("ddd") : f.Date)}'"));
-    var rainData = string.Join(",", Model.Forecast.Select(f => f.RainProbability));
-    @:var ctx = document.getElementById('rainChart').getContext('2d');
-    @:new Chart(ctx, {
-    @:  type: 'bar',
-    @:  data: {
-    @:    labels: [@Html.Raw(labels)],
-    @:    datasets: [{
-    @:      label: 'Rain Probability (%)',
-    @:      data: [@Html.Raw(rainData)],
-    @:      backgroundColor: 'rgba(30,136,229,0.6)',
-    @:      borderColor: '#1E88E5',
-    @:      borderWidth: 1,
-    @:      borderRadius: 8
-    @:    }]
-    @:  },
-    @:  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true } } }
-    @:});
-}
+(function () {
+    var app = document.getElementById('weatherApp');
+    if (!app) return;
+
+    var lat = app.dataset.lat, lon = app.dataset.lon;
+    var chart = null;
+
+    // WMO weather code -> label + emoji + theme
+    function describe(code) {
+        if (code === 0) return { text: 'Clear sky', icon: '☀️', theme: 'sun' };
+        if (code >= 1 && code <= 3) return { text: 'Partly cloudy', icon: '⛅', theme: 'cloud' };
+        if (code === 45 || code === 48) return { text: 'Foggy', icon: '🌫️', theme: 'cloud' };
+        if (code >= 51 && code <= 57) return { text: 'Drizzle', icon: '🌦️', theme: 'rain' };
+        if (code >= 61 && code <= 67) return { text: 'Rain', icon: '🌧️', theme: 'rain' };
+        if (code >= 71 && code <= 77) return { text: 'Snow', icon: '❄️', theme: 'cloud' };
+        if (code >= 80 && code <= 82) return { text: 'Rain showers', icon: '🌧️', theme: 'rain' };
+        if (code >= 95) return { text: 'Thunderstorm', icon: '⛈️', theme: 'rain' };
+        return { text: 'Variable', icon: '🌤️', theme: 'sun' };
+    }
+
+    var themes = {
+        sun:   'linear-gradient(135deg,#F57F17,#F9A825)',
+        cloud: 'linear-gradient(135deg,#546E7A,#78909C)',
+        rain:  'linear-gradient(135deg,#1565C0,#1E88E5)'
+    };
+
+    function setText(id, value) { document.getElementById(id).textContent = value; }
+
+    function renderAdvisories(rain, wind, temp) {
+        var items = [], level = 'success';
+        if (rain >= 70) { items.push('🌧️ Heavy rain expected. Check field drainage. Avoid applying fertilizers.'); level = 'danger'; }
+        else if (rain >= 40) { items.push('🌦️ Moderate rain possible. Monitor crop fields and ensure drainage.'); level = 'warning'; }
+        else { items.push('☀️ Clear weather. Good day for field activities and spraying.'); }
+        if (wind >= 40) items.push('💨 Strong winds. Secure covers, avoid spraying pesticides.');
+        if (temp >= 38) items.push('🌡️ Very hot. Water crops early morning or evening. Protect cattle.');
+
+        var box = document.getElementById('advisories');
+        box.innerHTML = '';
+        items.forEach(function (msg) {
+            var d = document.createElement('div');
+            d.className = 'alert alert-' + level + ' border-0 small mb-3';
+            d.style.borderRadius = '12px';
+            d.textContent = msg;
+            box.appendChild(d);
+        });
+    }
+
+    function renderCurrent(cur, todayRain) {
+        var d = describe(cur.weather_code);
+        document.getElementById('currentCard').style.background = themes[d.theme];
+        setText('curTemp', Math.round(cur.temperature_2m) + '°C');
+        setText('curCond', d.text);
+        setText('curIcon', d.icon);
+        setText('curHumidity', Math.round(cur.relative_humidity_2m) + '%');
+        setText('curWind', Math.round(cur.wind_speed_10m) + ' km/h');
+        setText('curRain', Math.round(todayRain) + '%');
+        renderAdvisories(todayRain, cur.wind_speed_10m, cur.temperature_2m);
+    }
+
+    function renderDaily(daily) {
+        var row = document.getElementById('forecastRow');
+        row.innerHTML = '';
+        var labels = [], rain = [];
+
+        daily.time.forEach(function (iso, i) {
+            var date = new Date(iso + 'T00:00:00');
+            var d = describe(daily.weather_code[i]);
+            var r = daily.precipitation_probability_max[i] || 0;
+            labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+            rain.push(r);
+
+            var card = document.createElement('div');
+            card.className = 'card border-0 shadow-sm flex-shrink-0 text-center p-3';
+            card.style.cssText = 'border-radius:16px;min-width:100px;';
+            card.innerHTML =
+                '<div class="small fw-bold text-muted">' + date.toLocaleDateString('en-US', { weekday: 'short' }) + '</div>' +
+                '<div class="small text-muted">' + date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</div>' +
+                '<div class="fs-3 my-2">' + d.icon + '</div>' +
+                '<div class="fw-bold small" style="color:var(--primary);">' + Math.round(daily.temperature_2m_max[i]) + '°</div>' +
+                '<div class="small text-muted">' + Math.round(daily.temperature_2m_min[i]) + '°</div>' +
+                '<div class="small mt-1"><span class="badge" style="background:#E3F2FD;color:#1565C0;font-size:0.65rem;">💧' +
+                Math.round(r) + '%</span></div>';
+            row.appendChild(card);
+        });
+
+        document.getElementById('chartSection').classList.remove('d-none');
+        if (chart) chart.destroy();
+        chart = new Chart(document.getElementById('rainChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Rain Probability (%)',
+                    data: rain,
+                    backgroundColor: 'rgba(30,136,229,0.6)',
+                    borderColor: '#1E88E5',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true } } }
+        });
+    }
+
+    function showError(on) {
+        document.getElementById('forecastError').classList.toggle('d-none', !on);
+        if (on) {
+            setText('curCond', 'Weather unavailable');
+            setText('curIcon', '⚠️');
+        }
+    }
+
+    async function load() {
+        showError(false);
+        setText('curCond', 'Loading weather…');
+        setText('curIcon', '⏳');
+
+        // Called from the visitor's browser, so Open-Meteo sees their IP, not Render's.
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) +
+                  '&longitude=' + encodeURIComponent(lon) +
+                  '&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code' +
+                  '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
+                  '&timezone=auto&forecast_days=7';
+
+        var ctrl = new AbortController();
+        var timer = setTimeout(function () { ctrl.abort(); }, 15000);
+        try {
+            var resp = await fetch(url, { signal: ctrl.signal });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            var data = await resp.json();
+            // "current" has no rain probability, so use today's daily maximum
+            var todayRain = (data.daily.precipitation_probability_max[0]) || 0;
+            renderCurrent(data.current, todayRain);
+            renderDaily(data.daily);
+        } catch (err) {
+            console.error('Weather fetch failed:', err);
+            showError(true);
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    document.getElementById('retryBtn').addEventListener('click', load);
+    load();
+})();
 </script>
 }

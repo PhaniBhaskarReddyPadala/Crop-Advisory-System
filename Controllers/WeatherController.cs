@@ -19,9 +19,11 @@ public class WeatherController : Controller
         _db = db;
     }
 
+    // The server only resolves the place name to coordinates.
+    // The forecast itself is fetched by the visitor's browser (see Views/Weather/Index.cshtml),
+    // because Open-Meteo rate-limits (HTTP 429) Render's shared server IP.
     public async Task<IActionResult> Index(string? location)
     {
-        // Default to farmer's registered location
         if (string.IsNullOrWhiteSpace(location))
         {
             var farmerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -29,42 +31,14 @@ public class WeatherController : Controller
             location = farmer?.Location ?? "Hyderabad";
         }
 
-        var current = await _weather.GetCurrentWeatherAsync(location);
-        var forecast = await _weather.GetForecastAsync(location);
+        var geo = await _weather.GeocodeAsync(location);
 
-        // Generate advisories
-        var advisories = new List<string>();
-        string alertLevel = "green";
-
-        if (current.RainProbability >= 70)
+        return View(new WeatherPageViewModel
         {
-            advisories.Add("🌧️ Heavy rain expected. Check field drainage. Avoid applying fertilizers.");
-            alertLevel = "red";
-        }
-        else if (current.RainProbability >= 40)
-        {
-            advisories.Add("🌦️ Moderate rain possible. Monitor crop fields and ensure drainage.");
-            alertLevel = "yellow";
-        }
-        else
-        {
-            advisories.Add("☀️ Clear weather. Good day for field activities and spraying.");
-        }
-
-        if (current.WindSpeed >= 40)
-            advisories.Add("💨 Strong winds. Secure covers, avoid spraying pesticides.");
-        if (current.TemperatureC >= 38)
-            advisories.Add("🌡️ Very hot. Water crops early morning or evening. Protect cattle.");
-
-        var vm = new WeatherPageViewModel
-        {
-            Location = location,
-            Current = current,
-            Forecast = forecast,
-            Advisories = advisories,
-            AlertLevel = alertLevel
-        };
-
-        return View(vm);
+            Location = geo?.Name ?? location,
+            LocationFound = geo != null,
+            Latitude = geo?.Latitude ?? 0,
+            Longitude = geo?.Longitude ?? 0
+        });
     }
 }

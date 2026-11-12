@@ -3,10 +3,9 @@ namespace CropAdvisory.ViewModels;
 public class WeatherPageViewModel
 {
     public string Location { get; set; } = string.Empty;
-    public WeatherInfoDto Current { get; set; } = new();
-    public List<DailyForecastDto> Forecast { get; set; } = new();
-    public List<string> Advisories { get; set; } = new();
-    public string AlertLevel { get; set; } = "green";
+    public bool LocationFound { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }
 
 public class PestListViewModel
