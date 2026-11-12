@@ -1,0 +1,88 @@
+@model CropAdvisory.Models.Crop
+@{
+    ViewData["Title"] = "Add New Crop";
+    Layout = "_AdminLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <a href="@Url.Action("Crops", "Admin")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <h4 class="fw-bold mb-0" style="color:var(--primary);">Add New Crop</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="border-radius:16px;">
+        <form asp-action="CreateCrop" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Crop Name</label>
+                    <input asp-for="CropName" class="form-control" placeholder="e.g. Rice, Cotton" required />
+                    <span asp-validation-for="CropName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Soil Type</label>
+                    <select asp-for="SoilType" class="form-select">
+                        <option value="Loamy">Loamy</option>
+                        <option value="Black">Black</option>
+                        <option value="Red">Red</option>
+                        <option value="Sandy">Sandy</option>
+                        <option value="Clay">Clay</option>
+                        <option value="Any">Any</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Min pH</label>
+                    <input asp-for="PHMin" type="number" step="0.1" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Max pH</label>
+                    <input asp-for="PHMax" type="number" step="0.1" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Season</label>
+                    <select asp-for="Season" class="form-select">
+                        <option value="Kharif">Kharif</option>
+                        <option value="Rabi">Rabi</option>
+                        <option value="Zaid">Zaid</option>
+                        <option value="Any">Any</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Irrigation</label>
+                    <select asp-for="NeedsIrrigation" class="form-select">
+                        <option value="true">Required</option>
+                        <option value="false">Rainfed / Not Required</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Growing Period</label>
+                    <input asp-for="GrowingPeriod" class="form-control" placeholder="e.g. 120-150 days" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Suitable Conditions</label>
+                    <input asp-for="SuitableConditions" class="form-control" placeholder="e.g. Warm climate, moderate rainfall" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Overview and cultivation notes..."></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="@Url.Action("Crops", "Admin")" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-success fw-bold px-4">Save Crop</button>
+            </div>
+        </form>
+    </div>
+</div>

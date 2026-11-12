@@ -1,0 +1,65 @@
+@model CropAdvisory.ViewModels.SeasonStepViewModel
+@{
+    ViewData["Title"] = "Step 3 - Season";
+    Layout = "_FarmerLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0" style="color:var(--primary);">Crop Advisor Wizard</h5>
+        <span class="badge bg-success">Step 3 of 4</span>
+    </div>
+    <div class="progress mb-4" style="height:8px;border-radius:8px;">
+        <div class="progress-bar bg-success" style="width:75%"></div>
+    </div>
+
+    <h4 class="fw-bold mb-1">Which agricultural season?</h4>
+    <p class="text-muted mb-4">Select the season in which you plan to grow crops.</p>
+
+    <form asp-action="Season" method="post">
+        @Html.AntiForgeryToken()
+        <span asp-validation-for="SelectedSeason" class="text-danger small d-block mb-3"></span>
+
+        <div class="d-flex flex-column gap-3 mb-4">
+            @foreach (var (season, emoji, months, desc) in new[] {
+                ("Kharif","🌧️","June – October","Monsoon crops — rice, cotton, groundnut, maize"),
+                ("Rabi","❄️","November – March","Winter crops — wheat, mustard, chickpea"),
+                ("Zaid","☀️","March – June","Summer crops — watermelon, tomato, cucumber")
+            })
+            {
+                <label class="season-card cursor-pointer">
+                    <input type="radio" name="SelectedSeason" value="@season" class="d-none season-radio"
+                           @(Model.SelectedSeason == season ? "checked" : "") />
+                    <div class="card border-2 p-3 d-flex flex-row align-items-center season-option" style="border-radius:16px;cursor:pointer;transition:all 0.2s;">
+                        <div class="fs-2 me-3">@emoji</div>
+                        <div>
+                            <div class="fw-bold fs-5">@season Season</div>
+                            <div class="small text-muted">@months</div>
+                            <div class="small text-muted">@desc</div>
+                        </div>
+                    </div>
+                </label>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+            Next: Irrigation <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.season-radio').forEach(function(r){
+    r.addEventListener('change', function(){
+        document.querySelectorAll('.season-option').forEach(c=>{ c.style.borderColor=''; c.style.background=''; });
+        this.closest('.season-card').querySelector('.season-option').style.borderColor='var(--primary)';
+        this.closest('.season-card').querySelector('.season-option').style.background='#E8F5E9';
+    });
+    if(r.checked){
+        r.closest('.season-card').querySelector('.season-option').style.borderColor='var(--primary)';
+        r.closest('.season-card').querySelector('.season-option').style.background='#E8F5E9';
+    }
+});
+</script>
+}

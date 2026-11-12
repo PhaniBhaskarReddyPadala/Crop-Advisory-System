@@ -1,0 +1,58 @@
+@model CropAdvisory.ViewModels.IrrigationStepViewModel
+@{
+    ViewData["Title"] = "Step 4 - Irrigation";
+    Layout = "_FarmerLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0" style="color:var(--primary);">Crop Advisor Wizard</h5>
+        <span class="badge bg-success">Step 4 of 4</span>
+    </div>
+    <div class="progress mb-4" style="height:8px;border-radius:8px;">
+        <div class="progress-bar bg-success" style="width:100%"></div>
+    </div>
+
+    <h4 class="fw-bold mb-1">Do you have irrigation?</h4>
+    <p class="text-muted mb-4">This helps us recommend crops that match your water availability.</p>
+
+    <form asp-action="Irrigation" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="d-flex flex-column gap-3 mb-5">
+            <label class="irrigation-card cursor-pointer">
+                <input type="radio" name="IrrigationAvailable" value="true" class="d-none irr-radio" />
+                <div class="card border-2 p-4 text-center irrigation-option" style="border-radius:16px;cursor:pointer;transition:all 0.2s;">
+                    <div class="fs-1 mb-2">💧</div>
+                    <div class="fw-bold fs-5">Yes, I have irrigation</div>
+                    <div class="text-muted small">Canal, borewell, drip or sprinkler system available</div>
+                </div>
+            </label>
+
+            <label class="irrigation-card cursor-pointer">
+                <input type="radio" name="IrrigationAvailable" value="false" class="d-none irr-radio" />
+                <div class="card border-2 p-4 text-center irrigation-option" style="border-radius:16px;cursor:pointer;transition:all 0.2s;">
+                    <div class="fs-1 mb-2">🌧️</div>
+                    <div class="fw-bold fs-5">No, rainfed only</div>
+                    <div class="text-muted small">I depend on rainfall, no artificial irrigation</div>
+                </div>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+            <i class="bi bi-stars me-2"></i>Get My Crop Recommendations!
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.irr-radio').forEach(function(r){
+    r.addEventListener('change', function(){
+        document.querySelectorAll('.irrigation-option').forEach(c=>{ c.style.borderColor=''; c.style.background=''; });
+        this.closest('.irrigation-card').querySelector('.irrigation-option').style.borderColor='var(--primary)';
+        this.closest('.irrigation-card').querySelector('.irrigation-option').style.background='#E8F5E9';
+    });
+});
+</script>
+}

@@ -1,0 +1,100 @@
+@model CropAdvisory.ViewModels.RecommendationResultViewModel
+@{
+    ViewData["Title"] = "Crop Recommendations";
+    Layout = "_FarmerLayout";
+}
+
+<div class="pt-3">
+    <div class="mb-4">
+        <h4 class="fw-bold" style="color:var(--primary);">🌾 Your Crop Recommendations</h4>
+        <p class="text-muted small">
+            Based on: <strong>@Model.SelectedSoilType Soil</strong> | pH <strong>@Model.SelectedPH.ToString("0.0")</strong> |
+            <strong>@Model.SelectedSeason Season</strong> | Irrigation: <strong>@(Model.IrrigationAvailable ? "Yes" : "No")</strong>
+        </p>
+    </div>
+
+    @if (!Model.MatchingCrops.Any())
+    {
+        <div class="card border-0 shadow-sm p-4 text-center" style="border-radius:16px;">
+            <div class="fs-1 mb-3">🤔</div>
+            <h5 class="fw-bold">No exact matches found</h5>
+            <p class="text-muted">Try adjusting your soil type or pH range. Our team is adding more crops regularly.</p>
+            <a href="@Url.Action("SoilType","Crop")" class="btn btn-success">Try Again</a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success border-0 mb-4" style="border-radius:12px;">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Found <strong>@Model.MatchingCrops.Count crop(s)</strong> suitable for your conditions.
+            Results shown in order of best match.
+        </div>
+
+        @foreach (var crop in Model.MatchingCrops)
+        {
+            <div class="card border-0 shadow-sm mb-3" style="border-radius:16px;overflow:hidden;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold mb-0" style="color:var(--primary);">🌾 @crop.CropName</h5>
+                        <span class="badge bg-@crop.SuitabilityColor">@crop.SuitabilityLabel</span>
+                    </div>
+                    <p class="text-muted small mb-3">@crop.Description</p>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background:#F1F8E9;">
+                                <div class="small text-muted">🌍 Soil</div>
+                                <div class="fw-bold small">@crop.SoilType</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background:#E3F2FD;">
+                                <div class="small text-muted">📅 Season</div>
+                                <div class="fw-bold small">@crop.Season</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 rounded" style="background:#FFF8E1;">
+                                <div class="small text-muted">⏱ Growing Period</div>
+                                <div class="fw-bold small">@crop.GrowingPeriod</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="@Url.Action("Index","Pest",new{cropId=crop.CropId})" class="btn btn-outline-warning btn-sm flex-grow-1">
+                            <i class="bi bi-bug me-1"></i>Pest Guide
+                        </a>
+                        <button onclick="speakCrop('@crop.CropName', '@crop.Description.Replace("'","\\'")')"
+                                class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-volume-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="d-flex gap-2 mt-4">
+            <a href="@Url.Action("SoilType","Crop")" class="btn btn-outline-success flex-grow-1">
+                <i class="bi bi-arrow-repeat me-2"></i>New Recommendation
+            </a>
+            <a href="@Url.Action("Index","Dashboard")" class="btn btn-success flex-grow-1">
+                <i class="bi bi-house me-2"></i>Dashboard
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+function speakCrop(name, desc) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        var msg = new SpeechSynthesisUtterance(name + '. ' + desc);
+        msg.lang = 'en-IN';
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+    } else {
+        alert('Voice not supported in this browser.');
+    }
+}
+</script>
+}

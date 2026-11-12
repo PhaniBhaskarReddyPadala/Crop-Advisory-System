@@ -1,0 +1,58 @@
+@model List<CropAdvisory.Models.PestAdvisory>
+@{
+    ViewData["Title"] = "Manage Pests";
+    Layout = "_AdminLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0" style="color:var(--primary);">🐛 Manage Pest Advisories</h4>
+        <a href="@Url.Action("CreatePest", "Admin")" class="btn btn-warning fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Add Pest Advisory
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px; overflow:hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Pest Name</th>
+                        <th>Target Crop</th>
+                        <th>Severity</th>
+                        <th>Symptoms</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pest in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@pest.PestName</td>
+                            <td>@(pest.Crop?.CropName ?? "General / All Crops")</td>
+                            <td>
+                                <span class="badge bg-@(pest.Severity == "High" ? "danger" : pest.Severity == "Medium" ? "warning" : "success")">
+                                    @pest.Severity
+                                </span>
+                            </td>
+                            <td>
+                                <div class="small text-muted text-truncate" style="max-width:300px;">@pest.Symptoms</div>
+                            </td>
+                            <td class="text-end">
+                                <a href="@Url.Action("EditPest", "Admin", new { id = pest.PestId })" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeletePest" asp-route-id="@pest.PestId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this pest advisory?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

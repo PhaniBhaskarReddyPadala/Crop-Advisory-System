@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="farmer-layout">
+    <div class="sidebar d-none d-lg-flex flex-column">
+        <div class="sidebar-brand">
+            <i class="bi bi-shield-check"></i>
+            <span>Admin<br>Panel</span>
+        </div>
+        <nav class="sidebar-nav flex-grow-1">
+            <a href="@Url.Action("Index","Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+            </a>
+            <a href="@Url.Action("Crops","Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Crop") == true ? "active" : "")">
+                <i class="bi bi-flower2"></i><span>Manage Crops</span>
+            </a>
+            <a href="@Url.Action("Pests","Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Pest") == true ? "active" : "")">
+                <i class="bi bi-bug-fill"></i><span>Manage Pests</span>
+            </a>
+            <a href="@Url.Action("Advisories","Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Advis") == true ? "active" : "")">
+                <i class="bi bi-megaphone-fill"></i><span>Advisories</span>
+            </a>
+            <a href="@Url.Action("Farmers","Admin")" class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Farmers" ? "active" : "")">
+                <i class="bi bi-people-fill"></i><span>Farmers</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="sidebar-link w-100 text-start border-0 bg-transparent">
+                    <i class="bi bi-box-arrow-left"></i><span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar d-flex align-items-center justify-content-between px-3 py-2">
+            <h6 class="mb-0 text-muted">@ViewData["Title"]</h6>
+            <span class="badge bg-danger"><i class="bi bi-shield-check me-1"></i>Admin</span>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mx-3 mt-2" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mx-3 mt-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="page-body px-3 pb-3">
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,135 @@
+@model CropAdvisory.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "My Dashboard";
+    Layout = "_FarmerLayout";
+    var greeting = DateTime.Now.Hour < 12 ? "Good Morning" : DateTime.Now.Hour < 17 ? "Good Afternoon" : "Good Evening";
+    var weatherBg = Model.Weather.Condition.Contains("Rain") ? "linear-gradient(135deg,#1565C0,#1E88E5)"
+                  : Model.Weather.Condition.Contains("Cloud") ? "linear-gradient(135deg,#546E7A,#78909C)"
+                  : "linear-gradient(135deg,#F57F17,#F9A825)";
+}
+
+<div class="pt-3">
+    <!-- Greeting -->
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1" style="color:var(--primary);">
+            @greeting, @Model.FarmerName! 🌾
+        </h4>
+        <p class="text-muted mb-0 small">
+            <i class="bi bi-calendar3 me-1"></i>@Model.CurrentDate.ToString("dddd, MMMM d, yyyy")
+            &nbsp;|&nbsp;
+            <i class="bi bi-geo-alt me-1"></i>@(string.IsNullOrEmpty(Model.Location) ? "Location not set" : Model.Location)
+            &nbsp;|&nbsp;
+            <i class="bi bi-leaf me-1"></i>@Model.Season Season
+        </p>
+    </div>
+
+    <!-- Weather Hero Card -->
+    <div class="card border-0 text-white mb-3" style="border-radius:20px;background:@weatherBg;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="display-4 fw-bold">@Model.Weather.TemperatureC.ToString("0")°C</div>
+                    <div class="fs-5">@Model.Weather.Condition</div>
+                    <div class="small opacity-75 mt-1">📍 @(string.IsNullOrEmpty(Model.Location) ? "Your Location" : Model.Location)</div>
+                </div>
+                <div class="text-end">
+                    <div class="fs-1">
+                        @(Model.Weather.Condition.Contains("Rain") ? "🌧️"
+                        : Model.Weather.Condition.Contains("Cloud") ? "☁️"
+                        : Model.Weather.Condition.Contains("Thunder") ? "⛈️"
+                        : "☀️")
+                    </div>
+                </div>
+            </div>
+            <hr class="border-white opacity-25 my-3" />
+            <div class="row g-2">
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">💧 Humidity</div>
+                    <div class="fw-bold">@Model.Weather.Humidity%</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">💨 Wind</div>
+                    <div class="fw-bold">@Model.Weather.WindSpeed km/h</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">🌧 Rain</div>
+                    <div class="fw-bold">@Model.Weather.RainProbability%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Alert Strip -->
+    @{
+        var alertClass = Model.WeatherAlertLevel == "red" ? "alert-danger"
+                       : Model.WeatherAlertLevel == "yellow" ? "alert-warning"
+                       : "alert-success";
+    }
+    <div class="alert @alertClass border-0 d-flex align-items-center mb-4" style="border-radius:12px;" role="alert">
+        <div class="me-2 fs-5">
+            @(Model.WeatherAlertLevel == "red" ? "🔴" : Model.WeatherAlertLevel == "yellow" ? "🟡" : "🟢")
+        </div>
+        <div class="small">@Model.WeatherAlertMessage</div>
+    </div>
+
+    <!-- Quick Action Cards -->
+    <h5 class="fw-bold mb-3" style="color:var(--text-dark);">Quick Actions</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-6">
+            <a href="@Url.Action("SoilType","Crop")" class="card border-0 shadow-sm text-decoration-none quick-action-card" style="border-radius:16px;">
+                <div class="card-body text-center py-4">
+                    <div class="fs-2 mb-2">🌾</div>
+                    <div class="fw-bold small" style="color:var(--primary);">Get Crop Advice</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="@Url.Action("Index","Weather")" class="card border-0 shadow-sm text-decoration-none quick-action-card" style="border-radius:16px;">
+                <div class="card-body text-center py-4">
+                    <div class="fs-2 mb-2">🌤️</div>
+                    <div class="fw-bold small" style="color:var(--weather-blue);">7-Day Forecast</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="@Url.Action("Index","Pest")" class="card border-0 shadow-sm text-decoration-none quick-action-card" style="border-radius:16px;">
+                <div class="card-body text-center py-4">
+                    <div class="fs-2 mb-2">🐛</div>
+                    <div class="fw-bold small" style="color:var(--secondary);">Pest Guide</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="@Url.Action("History","Crop")" class="card border-0 shadow-sm text-decoration-none quick-action-card" style="border-radius:16px;">
+                <div class="card-body text-center py-4">
+                    <div class="fs-2 mb-2">📋</div>
+                    <div class="fw-bold small" style="color:var(--secondary);">My History</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Recommendations -->
+    <h5 class="fw-bold mb-3" style="color:var(--text-dark);">Recent Recommendations</h5>
+    @if (!Model.RecentRecommendations.Any())
+    {
+        <div class="card border-0 shadow-sm p-4 text-center" style="border-radius:16px;">
+            <div class="fs-2 mb-2">🌱</div>
+            <p class="text-muted mb-3">No recommendations yet. Start your first crop advisory!</p>
+            <a href="@Url.Action("SoilType","Crop")" class="btn btn-success">Get Crop Advice</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var rec in Model.RecentRecommendations)
+        {
+            <div class="card border-0 shadow-sm mb-2 p-3 d-flex flex-row align-items-center" style="border-radius:12px;">
+                <div class="me-3 fs-3">🌾</div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">@rec.CropName</div>
+                    <div class="small text-muted">@rec.SoilType Soil &bull; @rec.Season &bull; @rec.Date.ToString("MMM d, yyyy")</div>
+                </div>
+            </div>
+        }
+    }
+</div>

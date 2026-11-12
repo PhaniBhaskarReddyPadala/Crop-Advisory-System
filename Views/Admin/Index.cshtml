@@ -1,0 +1,95 @@
+@model CropAdvisory.ViewModels.AdminStatsViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="pt-3">
+    <h4 class="fw-bold mb-4" style="color:var(--primary);">🛡️ Admin Dashboard</h4>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 text-center" style="border-radius:16px;background:#E8F5E9;">
+                <div class="fs-2 mb-1">👨‍🌾</div>
+                <div class="display-6 fw-bold" style="color:var(--primary);">@Model.TotalFarmers</div>
+                <div class="small text-muted">Farmers</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 text-center" style="border-radius:16px;background:#FFF8E1;">
+                <div class="fs-2 mb-1">🌾</div>
+                <div class="display-6 fw-bold" style="color:var(--accent);">@Model.TotalCrops</div>
+                <div class="small text-muted">Crops</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 text-center" style="border-radius:16px;background:#FBE9E7;">
+                <div class="fs-2 mb-1">🐛</div>
+                <div class="display-6 fw-bold text-danger">@Model.TotalPests</div>
+                <div class="small text-muted">Pests</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm p-3 text-center" style="border-radius:16px;background:#E3F2FD;">
+                <div class="fs-2 mb-1">📋</div>
+                <div class="display-6 fw-bold" style="color:var(--weather-blue);">@Model.TotalRecommendations</div>
+                <div class="small text-muted">Recommendations</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <a href="@Url.Action("Crops","Admin")" class="btn btn-outline-success w-100 py-3">
+                <i class="bi bi-flower2 fs-4 d-block mb-1"></i>Manage Crops
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="@Url.Action("Pests","Admin")" class="btn btn-outline-warning w-100 py-3">
+                <i class="bi bi-bug-fill fs-4 d-block mb-1"></i>Manage Pests
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="@Url.Action("Advisories","Admin")" class="btn btn-outline-primary w-100 py-3">
+                <i class="bi bi-megaphone-fill fs-4 d-block mb-1"></i>Advisories
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="@Url.Action("Farmers","Admin")" class="btn btn-outline-secondary w-100 py-3">
+                <i class="bi bi-people-fill fs-4 d-block mb-1"></i>View Farmers
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Farmers -->
+    <h5 class="fw-bold mb-3" style="color:var(--primary);">Recent Farmers</h5>
+    <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Language</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model.RecentFarmers)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@f.Name</td>
+                            <td>@f.Email</td>
+                            <td>@(string.IsNullOrEmpty(f.Location) ? "-" : f.Location)</td>
+                            <td><span class="badge bg-secondary">@f.PreferredLanguage</span></td>
+                            <td class="small text-muted">@f.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

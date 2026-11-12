@@ -1,0 +1,74 @@
+@model CropAdvisory.ViewModels.SoilTypeStepViewModel
+@{
+    ViewData["Title"] = "Step 1 - Soil Type";
+    Layout = "_FarmerLayout";
+    var soilInfo = new Dictionary<string, (string emoji, string desc, string color)>
+    {
+        ["Black"] = ("🖤", "Rich in nutrients, great water retention", "#37474F"),
+        ["Red"] = ("🔴", "Iron-rich, good for drought-resistant crops", "#C62828"),
+        ["Sandy"] = ("🟡", "Light and well-drained, low water retention", "#F9A825"),
+        ["Clay"] = ("🟤", "Heavy soil, excellent nutrient holding", "#795548"),
+        ["Loamy"] = ("🟢", "Ideal mix of sand, silt and clay — best for most crops", "#2E7D32")
+    };
+}
+
+<div class="pt-3">
+    <!-- Progress Indicator -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0" style="color:var(--primary);">Crop Advisor Wizard</h5>
+        <span class="badge bg-success">Step 1 of 4</span>
+    </div>
+    <div class="progress mb-4" style="height:8px;border-radius:8px;">
+        <div class="progress-bar bg-success" style="width:25%"></div>
+    </div>
+
+    <h4 class="fw-bold mb-1">What is your soil type?</h4>
+    <p class="text-muted mb-4">Choose the soil type that best describes your field.</p>
+
+    <form asp-action="SoilType" method="post">
+        @Html.AntiForgeryToken()
+        <span asp-validation-for="SelectedSoilType" class="text-danger small d-block mb-3"></span>
+
+        <div class="row g-3 mb-4">
+            @foreach (var soil in SoilTypeStepViewModel.SoilOptions)
+            {
+                var info = soilInfo[soil];
+                <div class="col-6 col-md-4">
+                    <label class="soil-card-label w-100 cursor-pointer">
+                        <input type="radio" name="SelectedSoilType" value="@soil" class="d-none soil-radio"
+                               @(Model.SelectedSoilType == soil ? "checked" : "") />
+                        <div class="card border-2 text-center p-3 soil-option" style="border-radius:16px;cursor:pointer;transition:all 0.2s;">
+                            <div class="fs-2 mb-2">@info.emoji</div>
+                            <div class="fw-bold">@soil Soil</div>
+                            <div class="small text-muted mt-1">@info.desc</div>
+                        </div>
+                    </label>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+            Next: Soil pH <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.soil-radio').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('.soil-option').forEach(c => {
+            c.style.borderColor = '';
+            c.style.background = '';
+        });
+        this.closest('.soil-card-label').querySelector('.soil-option').style.borderColor = 'var(--primary)';
+        this.closest('.soil-card-label').querySelector('.soil-option').style.background = '#E8F5E9';
+    });
+    // Apply on page load if already checked
+    if (radio.checked) {
+        radio.closest('.soil-card-label').querySelector('.soil-option').style.borderColor = 'var(--primary)';
+        radio.closest('.soil-card-label').querySelector('.soil-option').style.background = '#E8F5E9';
+    }
+});
+</script>
+}

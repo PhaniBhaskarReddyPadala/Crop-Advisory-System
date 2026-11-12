@@ -1,0 +1,70 @@
+@model CropAdvisory.Models.PestAdvisory
+@{
+    ViewData["Title"] = "Add Pest Advisory";
+    Layout = "_AdminLayout";
+    var crops = ViewBag.Crops as List<CropAdvisory.Models.Crop> ?? new List<CropAdvisory.Models.Crop>();
+}
+
+<div class="pt-3">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <a href="@Url.Action("Pests", "Admin")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <h4 class="fw-bold mb-0" style="color:var(--primary);">Add Pest Advisory</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="border-radius:16px;">
+        <form asp-action="CreatePest" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Pest Name</label>
+                    <input asp-for="PestName" class="form-control" placeholder="e.g. Stem Borer" required />
+                    <span asp-validation-for="PestName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Target Crop</label>
+                    <select asp-for="CropId" class="form-select">
+                        <option value="">General / All Crops</option>
+                        @foreach (var c in crops)
+                        {
+                            <option value="@c.CropId">@c.CropName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Severity Risk</label>
+                    <select asp-for="Severity" class="form-select">
+                        <option value="High">High</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Symptoms</label>
+                    <textarea asp-for="Symptoms" class="form-control" rows="2" placeholder="Visual indicators of infestation on the plant..."></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Preventive Measures</label>
+                    <textarea asp-for="PreventiveMeasures" class="form-control" rows="2" placeholder="Cultural practices, traps, resistant varieties..."></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Treatment / Control</label>
+                    <textarea asp-for="Treatment" class="form-control" rows="2" placeholder="Recommended biopesticides or chemical sprays..."></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="@Url.Action("Pests", "Admin")" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-warning fw-bold px-4">Save Pest Advisory</button>
+            </div>
+        </form>
+    </div>
+</div>

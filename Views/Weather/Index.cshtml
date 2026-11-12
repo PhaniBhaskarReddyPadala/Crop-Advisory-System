@@ -1,0 +1,132 @@
+@model CropAdvisory.ViewModels.WeatherPageViewModel
+@{
+    ViewData["Title"] = "Weather Forecast";
+    Layout = "_FarmerLayout";
+    var weatherBg = Model.Current.Condition.Contains("Rain") ? "linear-gradient(135deg,#1565C0,#1E88E5)"
+                  : Model.Current.Condition.Contains("Cloud") ? "linear-gradient(135deg,#546E7A,#78909C)"
+                  : "linear-gradient(135deg,#F57F17,#F9A825)";
+}
+
+<div class="pt-3">
+    <!-- Location Search -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" name="location" class="form-control border-start-0" placeholder="Search city or village…"
+                   value="@Model.Location" style="border-radius:0;" />
+            <button type="submit" class="btn btn-success">Search</button>
+        </div>
+    </form>
+
+    <!-- Alert -->
+    @{
+        var alertClass = Model.AlertLevel == "red" ? "alert-danger" : Model.AlertLevel == "yellow" ? "alert-warning" : "alert-success";
+    }
+    @foreach (var adv in Model.Advisories)
+    {
+        <div class="alert @alertClass border-0 small mb-3" style="border-radius:12px;">
+            @adv
+        </div>
+    }
+
+    <!-- Current Weather -->
+    <div class="card border-0 text-white mb-4" style="border-radius:20px;background:@weatherBg;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="display-4 fw-bold">@Model.Current.TemperatureC.ToString("0")°C</div>
+                    <div class="fs-5">@Model.Current.Condition</div>
+                    <div class="small opacity-75 mt-1">📍 @Model.Location</div>
+                </div>
+                <div class="fs-1">
+                    @(Model.Current.Condition.Contains("Rain") ? "🌧️"
+                    : Model.Current.Condition.Contains("Cloud") ? "☁️"
+                    : Model.Current.Condition.Contains("Thunder") ? "⛈️"
+                    : "☀️")
+                </div>
+            </div>
+            <hr class="border-white opacity-25 my-3" />
+            <div class="row g-2">
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">💧 Humidity</div>
+                    <div class="fw-bold">@Model.Current.Humidity%</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">💨 Wind</div>
+                    <div class="fw-bold">@Model.Current.WindSpeed km/h</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="small opacity-75">🌧 Rain</div>
+                    <div class="fw-bold">@Model.Current.RainProbability%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7-Day Forecast -->
+    <h5 class="fw-bold mb-3" style="color:var(--primary);">7-Day Forecast</h5>
+    @if (Model.Forecast.Any())
+    {
+        <div class="d-flex gap-3 overflow-auto pb-2 mb-4">
+            @foreach (var day in Model.Forecast)
+            {
+                var date = DateTime.TryParse(day.Date, out var d) ? d : DateTime.Now;
+                <div class="card border-0 shadow-sm flex-shrink-0 text-center p-3" style="border-radius:16px;min-width:100px;">
+                    <div class="small fw-bold text-muted">@date.ToString("ddd")</div>
+                    <div class="small text-muted">@date.ToString("MMM d")</div>
+                    <div class="fs-3 my-2">
+                        @(day.Condition.Contains("Rain") ? "🌧️"
+                        : day.Condition.Contains("Cloud") ? "☁️"
+                        : day.Condition.Contains("Thunder") ? "⛈️"
+                        : day.Condition.Contains("Drizzle") ? "🌦️"
+                        : "☀️")
+                    </div>
+                    <div class="fw-bold small" style="color:var(--primary);">@day.MaxTempC.ToString("0")°</div>
+                    <div class="small text-muted">@day.MinTempC.ToString("0")°</div>
+                    <div class="small mt-1">
+                        <span class="badge" style="background:#E3F2FD;color:#1565C0;font-size:0.65rem;">
+                            💧@day.RainProbability.ToString("0")%
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Rainfall Chart -->
+        <h5 class="fw-bold mb-3" style="color:var(--primary);">📊 Rainfall Probability</h5>
+        <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius:16px;">
+            <canvas id="rainChart" height="120"></canvas>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">Weather forecast unavailable. Please check your internet connection.</div>
+    }
+</div>
+
+@section Scripts {
+<script>
+@if (Model.Forecast.Any())
+{
+    var labels = string.Join(",", Model.Forecast.Select(f =>
+        $"'{(DateTime.TryParse(f.Date, out var d) ? d.ToString("ddd") : f.Date)}'"));
+    var rainData = string.Join(",", Model.Forecast.Select(f => f.RainProbability));
+    @:var ctx = document.getElementById('rainChart').getContext('2d');
+    @:new Chart(ctx, {
+    @:  type: 'bar',
+    @:  data: {
+    @:    labels: [@Html.Raw(labels)],
+    @:    datasets: [{
+    @:      label: 'Rain Probability (%)',
+    @:      data: [@Html.Raw(rainData)],
+    @:      backgroundColor: 'rgba(30,136,229,0.6)',
+    @:      borderColor: '#1E88E5',
+    @:      borderWidth: 1,
+    @:      borderRadius: 8
+    @:    }]
+    @:  },
+    @:  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true } } }
+    @:});
+}
+</script>
+}

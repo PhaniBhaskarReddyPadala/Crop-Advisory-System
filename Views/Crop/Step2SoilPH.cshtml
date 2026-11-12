@@ -1,0 +1,89 @@
+@model CropAdvisory.ViewModels.SoilPHStepViewModel
+@{
+    ViewData["Title"] = "Step 2 - Soil pH";
+    Layout = "_FarmerLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0" style="color:var(--primary);">Crop Advisor Wizard</h5>
+        <span class="badge bg-success">Step 2 of 4</span>
+    </div>
+    <div class="progress mb-4" style="height:8px;border-radius:8px;">
+        <div class="progress-bar bg-success" style="width:50%"></div>
+    </div>
+
+    <h4 class="fw-bold mb-1">What is your soil's pH level?</h4>
+    <p class="text-muted mb-4">Use the slider to select your soil pH. If unsure, use 7 (neutral).</p>
+
+    <form asp-action="SoilPH" method="post">
+        @Html.AntiForgeryToken()
+
+        <!-- pH Display -->
+        <div class="card border-0 shadow-sm p-4 mb-4 text-center" style="border-radius:16px;">
+            <div id="phValue" class="display-4 fw-bold" style="color:var(--primary);">@Model.PHValue.ToString("0.0")</div>
+            <div id="phLabel" class="text-muted">Neutral</div>
+
+            <div class="my-3">
+                <div class="ph-gradient" style="height:12px;border-radius:8px;background:linear-gradient(to right,#D32F2F,#F57C00,#F9A825,#2E7D32,#1E88E5,#6A1B9A);position:relative;">
+                    <div id="phIndicator" style="position:absolute;top:-6px;width:24px;height:24px;background:white;border:3px solid var(--primary);border-radius:50%;transform:translateX(-50%);left:50%;transition:left 0.1s;"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <span class="small text-danger">0 Acidic</span>
+                    <span class="small text-success">7 Neutral</span>
+                    <span class="small text-primary">14 Alkaline</span>
+                </div>
+            </div>
+
+            <input type="range" id="phSlider" name="PHValue" min="0" max="14" step="0.1" value="@Model.PHValue.ToString("0.0")"
+                   class="form-range" style="accent-color:var(--primary);" />
+        </div>
+
+        <!-- pH Guide -->
+        <div class="row g-2 mb-4">
+            <div class="col-4">
+                <div class="card border-danger border-2 p-2 text-center" style="border-radius:12px;">
+                    <div class="small fw-bold text-danger">0 – 6.5</div>
+                    <div class="small text-muted">Acidic</div>
+                    <div class="small">Tea, Blueberry</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card border-success border-2 p-2 text-center" style="border-radius:12px;">
+                    <div class="small fw-bold text-success">6.5 – 7.5</div>
+                    <div class="small text-muted">Neutral</div>
+                    <div class="small">Most Crops</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card border-primary border-2 p-2 text-center" style="border-radius:12px;">
+                    <div class="small fw-bold text-primary">7.5 – 14</div>
+                    <div class="small text-muted">Alkaline</div>
+                    <div class="small">Wheat, Barley</div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+            Next: Season <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+var slider = document.getElementById('phSlider');
+var phVal = document.getElementById('phValue');
+var phLabel = document.getElementById('phLabel');
+var indicator = document.getElementById('phIndicator');
+
+function updatePH() {
+    var v = parseFloat(slider.value);
+    phVal.textContent = v.toFixed(1);
+    phLabel.textContent = v < 6.5 ? 'Acidic — may need lime' : v > 7.5 ? 'Alkaline — may need sulphur' : 'Neutral — ideal for most crops';
+    indicator.style.left = (v / 14 * 100) + '%';
+}
+slider.addEventListener('input', updatePH);
+updatePH();
+</script>
+}

@@ -1,0 +1,39 @@
+@model List<CropAdvisory.ViewModels.RecommendationDto>
+@{
+    ViewData["Title"] = "My History";
+    Layout = "_FarmerLayout";
+}
+
+<div class="pt-3">
+    <h4 class="fw-bold mb-4" style="color:var(--primary);">📋 My Recommendation History</h4>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm p-4 text-center" style="border-radius:16px;">
+            <div class="fs-1 mb-3">📂</div>
+            <h5 class="fw-bold">No history yet</h5>
+            <p class="text-muted">Start your first crop recommendation to build your history.</p>
+            <a href="@Url.Action("SoilType","Crop")" class="btn btn-success">Get Crop Advice</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var rec in Model)
+        {
+            <div class="card border-0 shadow-sm mb-3 p-3" style="border-radius:12px;">
+                <div class="d-flex align-items-center">
+                    <div class="fs-2 me-3">🌾</div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">@rec.CropName</div>
+                        <div class="small text-muted">
+                            @rec.SoilType Soil &bull; @rec.Season Season &bull; @rec.Date.ToLocalTime().ToString("MMM d, yyyy")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <a href="@Url.Action("SoilType","Crop")" class="btn btn-success w-100 mt-2">
+            <i class="bi bi-plus-circle me-2"></i>New Recommendation
+        </a>
+    }
+</div>

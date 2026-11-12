@@ -1,0 +1,167 @@
+@{
+    ViewData["Title"] = "Farmer's Companion";
+    Layout = "_Layout";
+}
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg" style="background:var(--primary);">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold" href="/">
+            <i class="bi bi-flower1 me-2"></i>Farmer's Companion
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <i class="bi bi-list text-white fs-4"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-translate me-1"></i>Language
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">🇬🇧 English</a></li>
+                            <li><a class="dropdown-item" href="#">🇮🇳 తెలుగు</a></li>
+                            <li><a class="dropdown-item" href="#">🇮🇳 हिन्दी</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-outline-light btn-sm" href="@Url.Action("Login","Account")">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-warning btn-sm fw-bold" href="@Url.Action("Register","Account")">Register Free</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section text-white text-center py-5" style="background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,#388E3C 100%);min-height:85vh;display:flex;align-items:center;">
+    <div class="container">
+        <div class="mb-4">
+            <div style="font-size:5rem;line-height:1;">🌱</div>
+        </div>
+        <h1 class="display-4 fw-bold mb-3" style="font-family:'Poppins',sans-serif;">
+            Right Crop. Right Time. Right Care.
+        </h1>
+        <p class="lead mb-4 opacity-90" style="font-size:1.2rem;max-width:600px;margin:auto;">
+            Your trusted farming companion for crop suggestions, weather updates and agricultural precautions.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="@Url.Action("Register","Account")" class="btn btn-warning btn-lg fw-bold px-4 py-3">
+                <i class="bi bi-arrow-right-circle me-2"></i>Get Started
+            </a>
+            <a href="#features" class="btn btn-outline-light btn-lg px-4 py-3">
+                <i class="bi bi-info-circle me-2"></i>Explore Features
+            </a>
+        </div>
+        <div class="mt-5 d-flex justify-content-center gap-4 flex-wrap">
+            <div class="text-center">
+                <div class="fs-2 fw-bold">10+</div>
+                <div class="small opacity-75">Crops Covered</div>
+            </div>
+            <div class="text-center">
+                <div class="fs-2 fw-bold">7-Day</div>
+                <div class="small opacity-75">Weather Forecast</div>
+            </div>
+            <div class="text-center">
+                <div class="fs-2 fw-bold">Free</div>
+                <div class="small opacity-75">Forever</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-5" style="background:var(--bg-cream);">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-2" style="color:var(--primary);">Everything a Farmer Needs</h2>
+        <p class="text-center text-muted mb-5">Simple. Reliable. Made for the field.</p>
+        <div class="row g-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius:16px;">
+                    <div class="fs-1 mb-3">🌾</div>
+                    <h5 class="fw-bold" style="color:var(--primary);">Crop Advice</h5>
+                    <p class="text-muted small">Get crop recommendations based on your soil type, pH, season and irrigation availability.</p>
+                    <a href="@Url.Action("Register","Account")" class="btn btn-sm btn-success mt-auto">Try Now</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius:16px;">
+                    <div class="fs-1 mb-3">🌤️</div>
+                    <h5 class="fw-bold" style="color:var(--weather-blue);">Weather Forecast</h5>
+                    <p class="text-muted small">Real 7-day weather forecast with temperature, rainfall probability and wind speed.</p>
+                    <a href="@Url.Action("Register","Account")" class="btn btn-sm btn-primary mt-auto">Check Weather</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius:16px;">
+                    <div class="fs-1 mb-3">🐛</div>
+                    <h5 class="fw-bold" style="color:var(--secondary);">Pest Protection</h5>
+                    <p class="text-muted small">Learn about crop pests, symptoms and preventive measures before damage happens.</p>
+                    <a href="@Url.Action("Register","Account")" class="btn btn-sm btn-warning mt-auto">Pest Guide</a>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius:16px;">
+                    <div class="fs-1 mb-3">⚠️</div>
+                    <h5 class="fw-bold" style="color:var(--warning);">Weather Alerts</h5>
+                    <p class="text-muted small">Receive timely warnings about heavy rainfall, drought and extreme temperatures.</p>
+                    <a href="@Url.Action("Register","Account")" class="btn btn-sm btn-danger mt-auto">View Alerts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5" style="color:var(--primary);">How It Works</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;font-size:1.8rem;">1</div>
+                <h5 class="fw-bold">Register & Login</h5>
+                <p class="text-muted">Create your free account with your name, location and preferred language.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;font-size:1.8rem;">2</div>
+                <h5 class="fw-bold">Enter Your Details</h5>
+                <p class="text-muted">Tell us about your soil type, pH level, season and irrigation availability.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;font-size:1.8rem;">3</div>
+                <h5 class="fw-bold">Get Recommendations</h5>
+                <p class="text-muted">Receive crop recommendations, pest guides and weather advisories instantly.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background:var(--primary-dark);color:white;" class="py-4">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <h5 class="fw-bold"><i class="bi bi-flower1 me-2"></i>Farmer's Companion</h5>
+                <p class="small opacity-75">A smart agricultural assistant designed to help farmers make better decisions using technology.</p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold">Quick Links</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="@Url.Action("Login","Account")" class="text-white-50 text-decoration-none">Login</a></li>
+                    <li><a href="@Url.Action("Register","Account")" class="text-white-50 text-decoration-none">Register</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold">Contact</h6>
+                <p class="small opacity-75"><i class="bi bi-envelope me-2"></i>support@farmerscompanion.in</p>
+                <p class="small opacity-75"><i class="bi bi-telephone me-2"></i>Kisan Helpline: 1800-180-1551</p>
+            </div>
+        </div>
+        <hr class="border-secondary mt-3" />
+        <p class="text-center small opacity-50 mb-0">&copy; @DateTime.Now.Year Farmer's Companion. Built for Indian Farmers.</p>
+    </div>
+</footer>

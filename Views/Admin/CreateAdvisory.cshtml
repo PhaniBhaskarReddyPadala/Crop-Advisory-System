@@ -1,0 +1,59 @@
+@model CropAdvisory.Models.Advisory
+@{
+    ViewData["Title"] = "Create Advisory";
+    Layout = "_AdminLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <a href="@Url.Action("Advisories", "Admin")" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <h4 class="fw-bold mb-0" style="color:var(--primary);">Post New Agricultural Advisory</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="border-radius:16px;">
+        <form asp-action="CreateAdvisory" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Title</label>
+                    <input asp-for="Title" class="form-control" placeholder="e.g. Monsoon Soil Care Advice" required />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select asp-for="Category" class="form-select">
+                        <option value="General">General</option>
+                        <option value="Weather">Weather Alert</option>
+                        <option value="Pest">Pest Outbreak</option>
+                        <option value="Soil">Soil Health</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Alert Level</label>
+                    <select asp-for="Level" class="form-select">
+                        <option value="green">🟢 Green (Safe / Routine)</option>
+                        <option value="yellow">🟡 Yellow (Caution / Watch)</option>
+                        <option value="red">🔴 Red (Urgent / Warning)</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Advisory Content</label>
+                    <textarea asp-for="Content" class="form-control" rows="4" placeholder="Detailed guidance and instructions for farmers..." required></textarea>
+                    <span asp-validation-for="Content" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="@Url.Action("Advisories", "Admin")" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary fw-bold px-4">Publish Advisory</button>
+            </div>
+        </form>
+    </div>
+</div>

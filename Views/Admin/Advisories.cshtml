@@ -1,0 +1,65 @@
+@model List<CropAdvisory.Models.Advisory>
+@{
+    ViewData["Title"] = "General Advisories";
+    Layout = "_AdminLayout";
+}
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0" style="color:var(--primary);">📢 Agricultural Advisories</h4>
+        <a href="@Url.Action("CreateAdvisory", "Admin")" class="btn btn-primary fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Post New Advisory
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px; overflow:hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Alert Level</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var adv in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold">@adv.Title</div>
+                                <div class="small text-muted text-truncate" style="max-width:350px;">@adv.Content</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">@adv.Category</span></td>
+                            <td>
+                                <span class="badge bg-@(adv.Level == "red" ? "danger" : adv.Level == "yellow" ? "warning" : "success")">
+                                    @(adv.Level.ToUpper())
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-@(adv.IsActive ? "success-subtle text-success" : "secondary")">
+                                    @(adv.IsActive ? "Active" : "Archived")
+                                </span>
+                            </td>
+                            <td class="small text-muted">@adv.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                            <td class="text-end">
+                                <a href="@Url.Action("EditAdvisory", "Admin", new { id = adv.AdvisoryId })" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteAdvisory" asp-route-id="@adv.AdvisoryId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this advisory?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
