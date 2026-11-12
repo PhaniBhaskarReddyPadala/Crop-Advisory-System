@@ -17,11 +17,17 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
             .AddEnvironmentVariables()
             .Build();
 
-        var rawConn = config.GetConnectionString("DefaultConnection")
-                      ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-                      ?? Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING");
+        var rawConn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+        if (string.IsNullOrWhiteSpace(rawConn))
+            rawConn = Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (string.IsNullOrWhiteSpace(rawConn))
+            rawConn = Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING");
+        if (string.IsNullOrWhiteSpace(rawConn))
+            rawConn = config.GetConnectionString("DefaultConnection");
 
         var connStr = ConvertPostgresUrlToConnectionString(rawConn);
+        if (string.IsNullOrWhiteSpace(connStr))
+            throw new InvalidOperationException("Configure a PostgreSQL connection string for EF design-time operations.");
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseNpgsql(connStr);
@@ -33,9 +39,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
     {
         if (string.IsNullOrWhiteSpace(connectionString) ||
             connectionString.Contains("[PASTE YOUR", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Host=localhost;Database=CropAdvisoryDb;Username=postgres;Password=postgres";
-        }
+            return string.Empty;
 
         if (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
             connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))

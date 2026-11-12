@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CropAdvisory")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+186b07d595b784d6fd57bde3ea829da66f31ff56")]
 [assembly: System.Reflection.AssemblyProductAttribute("CropAdvisory")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CropAdvisory")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

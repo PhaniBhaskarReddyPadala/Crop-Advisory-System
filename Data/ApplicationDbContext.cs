@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using CropAdvisory.Models;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace CropAdvisory.Data;
 
@@ -48,32 +49,47 @@ public class ApplicationDbContext : DbContext
 
 public static class DbInitializer
 {
-    public static void Initialize(ApplicationDbContext db)
+    public static void Initialize(
+        ApplicationDbContext db,
+        string? initialAdminEmail,
+        string? initialAdminPassword,
+        ILogger logger)
     {
-        try
-        {
-            db.Database.Migrate();
-        }
-        catch
-        {
-            db.Database.EnsureCreated();
-        }
+        db.Database.Migrate();
 
-        // Seed Admin if not present
+        var initialAdminCreated = false;
         if (!db.Farmers.Any(f => f.Role == "Admin"))
         {
-            var hasher = new PasswordHasher<Farmer>();
+            if (string.IsNullOrWhiteSpace(initialAdminEmail) ||
+                string.IsNullOrWhiteSpace(initialAdminPassword))
+            {
+                throw new InvalidOperationException(
+                    "Set INITIAL_ADMIN_EMAIL and INITIAL_ADMIN_PASSWORD to create the initial admin account.");
+            }
+
+            var email = initialAdminEmail.Trim();
+            if (email.Length > 150 || !new EmailAddressAttribute().IsValid(email))
+                throw new InvalidOperationException("INITIAL_ADMIN_EMAIL must be a valid email address.");
+
+            if (initialAdminPassword.Length < 12)
+                throw new InvalidOperationException("INITIAL_ADMIN_PASSWORD must be at least 12 characters.");
+
+            if (db.Farmers.Any(f => f.Email == email))
+                throw new InvalidOperationException(
+                    "The initial admin email is already assigned to another account.");
+
             var admin = new Farmer
             {
                 Name = "Admin",
-                Email = "admin@cropadvisory.com",
+                Email = email,
                 Role = "Admin",
                 Location = "Hyderabad",
                 PreferredLanguage = "en",
                 CreatedAt = DateTime.UtcNow
             };
-            admin.PasswordHash = hasher.HashPassword(admin, "Admin@123");
+            admin.PasswordHash = new PasswordHasher<Farmer>().HashPassword(admin, initialAdminPassword);
             db.Farmers.Add(admin);
+            initialAdminCreated = true;
         }
 
         // Seed sample crops if none exist
@@ -296,5 +312,8 @@ public static class DbInitializer
         }
 
         db.SaveChanges();
+
+        if (initialAdminCreated)
+            logger.LogInformation("Initial admin account was provisioned from configured credentials.");
     }
 }

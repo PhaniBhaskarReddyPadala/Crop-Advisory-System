@@ -108,3 +108,4 @@ C:\Users\reddy\.gemini\antigravity\brain\2c11eae5-7971-47a4-aa11-4101039b0e10\Cr
 C:\Users\reddy\.gemini\antigravity\brain\2c11eae5-7971-47a4-aa11-4101039b0e10\CropAdvisory\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
 C:\Users\reddy\.gemini\antigravity\brain\2c11eae5-7971-47a4-aa11-4101039b0e10\CropAdvisory\bin\Debug\net8.0\Npgsql.dll
 C:\Users\reddy\.gemini\antigravity\brain\2c11eae5-7971-47a4-aa11-4101039b0e10\CropAdvisory\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\reddy\.gemini\antigravity\brain\2c11eae5-7971-47a4-aa11-4101039b0e10\CropAdvisory\obj\Debug\net8.0\CropAdvisory.sourcelink.json

@@ -9,13 +9,14 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure User Secrets are loaded in any environment
-builder.Configuration.AddUserSecrets<Program>(optional: true);
-
 // ─── Configuration & Database ───────────────────────────────────────────────
-var rawConn = builder.Configuration.GetConnectionString("DefaultConnection")
-              ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-              ?? Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING");
+var rawConn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+if (string.IsNullOrWhiteSpace(rawConn))
+    rawConn = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (string.IsNullOrWhiteSpace(rawConn))
+    rawConn = Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING");
+if (string.IsNullOrWhiteSpace(rawConn))
+    rawConn = builder.Configuration.GetConnectionString("DefaultConnection");
 
 var connStr = ConvertPostgresUrlToConnectionString(rawConn);
 
@@ -72,7 +73,8 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
 app.UseStaticFiles();
@@ -91,20 +93,25 @@ if (!string.IsNullOrWhiteSpace(connStr))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
-        DbInitializer.Initialize(db);
+        DbInitializer.Initialize(
+            db,
+            Environment.GetEnvironmentVariable("INITIAL_ADMIN_EMAIL"),
+            Environment.GetEnvironmentVariable("INITIAL_ADMIN_PASSWORD"),
+            logger);
     }
-    catch (Exception ex)
+    catch
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred migrating or seeding the PostgreSQL database.");
+        logger.LogCritical("Database initialization failed. Verify database connectivity, migrations, and initial-admin configuration.");
+        throw new InvalidOperationException("Database initialization failed. Verify the server configuration.");
     }
 }
 else
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogWarning("No DefaultConnection or DATABASE_URL provided. Please configure your Neon PostgreSQL connection string using user secrets or environment variables.");
+    logger.LogWarning("No PostgreSQL connection string is configured. Set ConnectionStrings__DefaultConnection or DATABASE_URL.");
 }
 
 app.Run();

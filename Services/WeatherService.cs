@@ -37,9 +37,9 @@ public class WeatherService : IWeatherService
             var first = results[0];
             return (first.GetProperty("latitude").GetDouble(), first.GetProperty("longitude").GetDouble());
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogWarning(ex, "Geocoding failed for location: {Location}", location);
+            _logger.LogWarning("Geocoding request failed.");
             return null;
         }
     }
@@ -66,9 +66,9 @@ public class WeatherService : IWeatherService
                 Condition = WeatherCodeToCondition(current.GetProperty("weathercode").GetInt32())
             };
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogWarning(ex, "Weather fetch failed for {Location}", location);
+            _logger.LogWarning("Current weather request failed.");
             return new WeatherInfoDto { TemperatureC = 28, Condition = "Sunny", Humidity = 50, WindSpeed = 10, RainProbability = 10 };
         }
     }
@@ -101,9 +101,9 @@ public class WeatherService : IWeatherService
                 RainProbability = rainProbs[i]
             }).ToList();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogWarning(ex, "Forecast fetch failed for {Location}", location);
+            _logger.LogWarning("Weather forecast request failed.");
             return new List<DailyForecastDto>();
         }
     }
