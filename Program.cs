@@ -9,6 +9,16 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load user secrets across all environments
+builder.Configuration.AddUserSecrets<Program>(optional: true);
+
+// Render / Container Dynamic Port Binding
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 // ─── Configuration & Database ───────────────────────────────────────────────
 var rawConn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 if (string.IsNullOrWhiteSpace(rawConn))

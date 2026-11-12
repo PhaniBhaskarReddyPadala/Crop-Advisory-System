@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: crop-advisory
+    runtime: docker
+    plan: free
+    region: ohio
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
